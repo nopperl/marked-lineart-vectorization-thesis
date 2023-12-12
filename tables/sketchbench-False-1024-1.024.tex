@@ -1,0 +1,24 @@
+\begin{tabular}{lllllll}
+\toprule
+ &  & autotrace & \parbox[]{5em}{polyvector-\\flow} & \parbox[]{4em}{virtual-\\sketching} & \parbox[]{4em}{deepvec-\\techdraw} & marked \\
+\midrule
+\multirow[t]{2}{*}{\acrshort{iou} $\uparrow$} & median & 0.01 & \textbf{0.74} & 0.50 & \textit{0.58} & 0.30 \\
+ & \acrshort{iqr} & 0.00 & 0.04 & 0.03 & 0.07 & 0.03 \\
+\cline{1-7}
+\multirow[t]{2}{*}{curve ratio} & median & 1.11 & 78.40 & 2.47 & 0.97 & 1.31 \\
+ & \acrshort{iqr} & 0.55 & 58.65 & 1.15 & 0.46 & 0.77 \\
+\cline{1-7}
+\multirow[t]{2}{*}{curve length} & median & 1.41 & 0.52 & 16.99 & 26.60 & 23.40 \\
+ & \acrshort{iqr} & 0.00 & 0.01 & 1.72 & 11.05 & 7.68 \\
+\cline{1-7}
+\multirow[t]{2}{*}{curve distance} & median & 2390.00 & 12440.78 & 7069.76 & 2540.16 & 2680.15 \\
+ & \acrshort{iqr} & 1291.00 & 5584.74 & 3125.29 & 1886.62 & 1642.49 \\
+\cline{1-7}
+\multirow[t]{2}{*}{curve error $\downarrow$} & median & 102.56 & 109.27 & 94.82 & \textbf{72.07} & \textit{93.62} \\
+ & \acrshort{iqr} & 47.00 & 56.38 & 55.52 & 33.63 & 72.84 \\
+\cline{1-7}
+\multirow[t]{2}{*}{runtime $\downarrow$} & median & \textbf{1.84} & 280.16 & 56.01 & 300.92 & \textit{15.73} \\
+ & \acrshort{iqr} & 0.44 & 132.90 & 17.81 & 186.96 & 13.91 \\
+\cline{1-7}
+\bottomrule
+\end{tabular}

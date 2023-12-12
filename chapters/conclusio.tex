@@ -1,0 +1,126 @@
+\chapter{Conclusion}
+\label{ch:conclusio}
+
+The objective of this work was to ascertain to what extent it is possible to automatically vectorize clean animation frame line art in a semantically meaningful way. For this purpose, \Cref{ch:bg} provided the theoretical foundations and \Cref{ch:related} explored existing line-art image vectorization methods. In order to answer the \gls{rq1}, \Cref{ch:alg} proposed a clean animation frame line-art image vectorization method and compared it with prior work on a test dataset provided by Tonari Animation. It could be shown that while the proposed method outperforms prior work at the default input image resolution, ultimately all line-art image vectorization methods work only in limited extent for clean animation frames, especially failing to properly reconstruct details and primitives with high curvature.
+
+This chapter provides an analysis of advantages and disadvantages of the contributions in \Cref{sec:conclusio.analysis}. \Cref{sec:limitations} summarizes the limitations of this work. Finally, \Cref{sec:future.work} lists potential future work relating to the research presented in this work.
+
+\section{Advantages}
+\label{sec:conclusio.analysis}
+%This section provides a summary analysis of important advantages and disadvantages of the proposed line-art image vectorization method.
+
+The developed line-art image vectorization method exhibits a number of advantages compared to existing methods. These encompass both general advantages and advantages relating to the application domain of clean animation frames.
+
+\paragraph{Resolution-independence}
+
+As shown in \Cref{subsec:eval.quant,subsec:eval.qual}, the performance of the developed method remains remarkably stable at different input image resolutions. In contrast, other state-of-the-art methods perform noticeably worse at lower resolutions. This makes the developed method uniquely suited to be applied to clean animation frames, which are drawn with a target resolution of 720x405px in the dataset considered in this work (see \Cref{sec:dataset}). Note that, as mentioned in \Cref{subsec:eval.quant.1024}, one potential way to apply other methods to input images at lower resolutions is to use super-resolution models \citep{DBLP:journals/pami/DongLHT16} on the input images. However, these models would need to be successfully finetuned to high-resolution line-art images beforehand, which is an open research question on its own.
+
+Keep in mind that the resolution-independence property was only tested at resolutions between 512px and 1024px. Resolutions smaller than 512px are unreasonably small to perform line-art image vectorization on.
+
+\paragraph{Binarization-independence}
+
+Similar to the input image resolution, the performance of the developed method remains remarkably stable on binarized and non-binarized versions of the input image. In contrast, methods such as the ones by \citet{Puhachov2021KeypointPolyvector,autotrace} perform noticeably worse on non-binarized input images. This decrease in performance is especially pronounced for low-resolution non-binarized images (see \Cref{subsec:eval.quant,subsec:eval.qual}). For these kinds of input images, the method developed in this work is uniquely suited. For other cases, prior work might yield better results.
+
+\paragraph{Nearly end-to-end differentiable}
+\label{p:advtantages.e2e}
+
+The method developed in this work is designed to be as end-to-end differentiable as possible. This is done in order to improve the ease of adapting it to input images of other domains via finetuning (see \Cref{sec:challenges}). The only non-differentiable part is the iterative placing of marker pixels on curves to reconstruct (i.e., curve identification, as explained in \Cref{subsubsec:curve.ident}). To make the model completely end-to-end differentiable, this part would need to be replaced with a learned model.
+
+\paragraph{Easy manual fixing}
+
+It is inevitable that output vector images will contain errors. These can be roughly divided into missing curves and incorrect curves. As described in \Cref{subsec:cleanframes}, identifying missing curves is easier than fixing incorrectly reconstructed curves. Hence, the method is decomposed into a curve identification and curve reconstruction part. This way, missing curves (i.e., errors in the curve identification) can easily be fixed by placing a marker pixel on it and invoking the curve reconstruction part of the method (see \Cref{subsec:model.infer}).
+
+\paragraph{Performance}
+The developed method is the fastest deep learning-based method tested, being significantly faster than other methods (see \Cref{subsec:eval.quant}). However, note that it is significantly outperformed by the traditional AutoTrace \citep{autotrace} algorithm.
+
+On non-binarized low-resolution images, the method is 1.5x faster than the second-fastest deep learning-based method. However, note that most other methods do not perform well on such input images. These work better on binarized or high-resolution input images, where the runtime of the developed method stays remarkably stable, while the runtime of other methods drastically increases. This leads to a runtime that is up to 4.5 times faster than the second-best performing method.
+
+Furthermore, the trained model is also the smallest of all deep learning models considered in this work, consisting of only 2.2 million parameters with a maximum \gls{gpu} memory usage of 1008 \gls{mib} (see \Cref{tab:max_memory}).
+
+Furthermore, for accessibility and reproducibility, the code, model and parts of the dataset are publicly available at \url{https://github.com/nopperl/marked-lineart-vectorization}.
+%It shares this property with other prior work evaluated in \Cref{sec:eval}. The minor exception to this is the method by \citet{Puhachov2021KeypointPolyvector}, since it relies on the proprietary Gurobi library \citep{gurobi}. Further,
+Note that proprietary clean animation frames form a significant part of the training dataset, %However, the majority of the training dataset is publicly available. Moreover,
+but the evaluation in \Cref{sec:eval} was also performed on a publicly available dataset.
+
+\paragraph{Suited for large number of curves}
+As described in \Cref{subsec:cleanframes}, clean animation frames consist of a large number of curves. In order to handle this, the method is designed as an iterative algorithm. It shares this property with all other prior work evaluated in \Cref{sec:eval}.
+
+\section{Limitations and Disadvantages}
+\label{sec:limitations}
+
+To better contextualize the contributions of this work, this section lists disadvantages and limitations.
+
+\subsection{Disadvantages}
+
+The developed line-art image vectorization method possesses a range of disadvantages which limit its application to real-world images.
+
+\paragraph{Holes in curve sequences}
+
+The developed method on average reconstructs curves smaller than they appear visually. This leads to a high number of small holes in curve sequences, which is very undesirable for clean animation frames. As \Cref{sec:anime.prod,subsec:cleanframes} describe, one step in the limited animation production workflow after the clean animation frame is drawn is the filling of colors in the regions defined by the clean animation frame. This can only be done efficiently if the regions are properly enclosed.
+
+\paragraph{Limited semantic correctness}
+
+As explained in \Cref{sec:intro.problem}, an important property of resulting clean animation frames is that their vector structure is semantically correct. This was attempted by training the marked curve reconstruction model using a vector-based loss. However, as \Cref{subsec:eval.qual,subsec:eval.quant} show, similar to other evaluated methods, the outputs of the developed method do not sufficiently match the required semantic structure. This is especially the case for regions with small details such as eyes. These errors are especially undesirable, as clean animation frames need to be semantically correct for successive workflow steps, thus requiring laborious manually fixing.
+
+\paragraph{Bias towards low curvature}
+
+As \Cref{subsec:low.curvature} shows, the developed method possesses a bias towards generating primitives with low curvature, even if the target shape in the input image has a high curvature. It shares this property with other state-of-the-art methods. This harms the applicability of the method to images containing a high amount of high-curvature shapes.
+
+\paragraph{Catastrophic failure}
+
+As \Cref{subsec:catastrophy} shows, the developed method catastrophically fails to vectorize a challenging clean animation frame in the test dataset. This non-linear and seemingly random failure mode limits the applicability of this method. A potential cause for this failure is the low amount of training data, as such failures are common for underfit deep learning models.
+
+\subsection{Limitations}
+
+There exist limitations in the method design, data and evaluation setup as noted in \Cref{subsubsec:model.invok,subsec:dataset.limitations,subsec:eval.limitations,subsec:ablation.limitation}.
+
+\Cref{subsubsec:model.invok} describes limitations in the method design, which mainly consist of the method being unable to handle overlapping curves properly. In these cases, there exist pixels in the input raster image which belong to multiple curves. Once one of these curves is reconstructed, the overlapping pixels are removed, leaving behind a hole inside the other curves to which the pixel belongs. If this hole is large enough, it effectively splits the curve for the model, which will then reconstruct only the part until the hole. However, the amount of overlapping curves is rather small in the training and evaluation data, as shown in \Cref{tab:data.subsets}.
+
+There is a considerable amount of limitations associated with the data used in this work, which are described in \Cref{subsec:dataset.limitations}. The main limitation is the scarce amount of data used to train the model, which serves as a significant bottleneck for model performance. Furthermore the artist distribution for the Tonari clean animation frames is skewed, which harms generalization. Moreover, there are a range of irregularities in the Tonari clean animation frame subset, such as visually erased curves still being present in the vector structure, overlapping curves and curves with colors and stroke widths that do not conform to the clean animation frame schema defined in \Cref{fig:bg.color-schema}.
+
+A range of factors limit the evaluation, as described in \Cref{subsec:eval.limitations}. Most importantly, the evaluation is based on a subset of proprietary clean animation frames by Tonari Animation. However, this issue is solved by additionally computing all evaluation steps with the publicly available SketchBench dataset \citep{Yan:2020:ABR}. This includes a separate model trained without information leak from SketchBench test data. Additionally, there are limitations in the setup of prior works, such as the refinement algorithm by \citet{DBLP:conf/eccv/EgiazarianVAVST20} lending an unfair advantage to their method, the method by \citet{Puhachov2021KeypointPolyvector} requiring the proprietary Gurobi library \citep{gurobi} and AutoTrace \citep{autotrace} being run without \gls{gpu} acceleration.
+
+Furthermore, keep in mind that the line-art image vectorization method as presented in this work is limited to clean line-art images. However, due to the end-to-end differentiable nature of the method, \Cref{subsec:model.infer} proposes ways to adapt it to inputs of different domains. 
+
+\section{Future Work}
+\label{sec:future.work}
+
+There are numerous opportunities for future work relating to the research presented. These mainly pertain to the \gls{ro1} and include improvements to the developed method by changing the data used to train the model (see \Cref{subsec:future.method.data}) or the design of the method architecture (see \Cref{subsec:future.method.architecture}). Furthermore, an important potential extension is the adaptation of the developed method to new tasks (see \Cref{subsec:future.tasks}).
+
+Moreover, a straightforward option for future work regarding the \gls{ro2} (i.e., the evaluation) would be to assess how the developed line-art image vectorization method performs on different but adjacent domains (e.g., product sketches).
+
+\subsection{Data Improvements}
+\label{subsec:future.method.data}
+As noted in \Cref{subsec:dataset.limitations}, the scarce amount of high-quality data is the main limiting factor of this work. There are multiple potential ways to improve this issue. One is to train a general line-art image vectorization model on a large dataset consisting of multiple domains of line-art images such as technical line drawings, product sketches, amateur sketches, cartoons or illustrations. A successful clean animation frame vectorization model could then be achieved by finetuning the general model on a small clean animation frame dataset. For this approach to work, the training dataset of the general model needs to be several orders of magnitudes larger than the one considered in this work.
+
+Another way to increase the available data is to consider more complex data synthesizing techniques. The synthetic data used in this work is quite trivial and devoid of any semantic structure. There may be heuristic optimization or deep learning-based techniques to synthesize data that matches clean line-art images more closely.
+
+On the other hand, it may be possible to exploit the small available data in a better way. This might be achieved by a more complex mixture of the data, such as starting the training process with a high portion of TU Berlin amateur sketches and linearly reducing the contribution of this subset in the spirit of curriculum learning \citep{10.1145/1553374.1553380}. Another possibility is to extract more structural features from the input raster image using pre-trained models, such as keypoint detection \citep{Puhachov2021KeypointPolyvector}, object detection \citep{yolov5}, edge detection \citep{xsoria2020dexined} or segmentation \citep{yaas} models.
+
+Furthermore, as noted in \Cref{subsec:dataset.stats}, an important decision is whether to consider curves or paths of curves as the graphical primitive for the model, with this work deciding for the former. An interesting question is how the methods studied in this work perform when using paths as primitive.
+
+A dialectical approach would be to use both paths and curves as primitives and structure the model output hierarchically. In other words, the model could be trained to output either a single curve or a sequence (and possibly a hierarchy) of curves. This would be useful for domains in which hierarchical information is important, which is not the case for clean animation frames.
+
+\subsection{Architectural Improvements}
+\label{subsec:future.method.architecture}
+
+There are multiple potential avenues for improving the architecture of the developed method. For one, in the iterative curve reconstruction algorithm, the input image is centered on the target mark prior to being input into the marked curve reconstruction model. It might also be useful to zoom the input image in the center. This leads to two benefits. Firstly, the model no longer receives distracting information about the periphery of the image when the task is to reconstruct only the curve at the center. Secondly, if the input image is of high resolution, the model would receive the zoomed in region at a higher resolution than in the standard algorithm design, potentially enabling it to better discern features about the curve to reconstruct. A potential disadvantage of this are long curves, which could get clamped by the zoom level. However, such curves are scarce in the data considered in this work.
+
+Another possibility of improving the iterative curve reconstruction algorithm is to choose a better stopping criterion described in \Cref{subsubsec:model.invok}. It is currently defined as $T=\lfloor B*0.1 \rceil$, where $B$ is the number of black pixels in the original image. This might be too high for some images and too low for others (such as the one shown in \Cref{fig:tonari-full_45}). It might be possible to derive a stopping criterion that is better suited to the input image by directly predicting the optimal number of output curves using a small learned model instead.
+
+Furthermore, it might be possible to extend the iterative curve reconstruction algorithm with more extensive post-processing. One possibility is to use the refinement algorithm of \citet{DBLP:conf/eccv/EgiazarianVAVST20}, which has the potential of significantly improving results (see \Cref{fig:deepvectechdraw.steps}). However, it is not differentiable and has strong assumptions on the input image.
+
+There are also potential improvements on the model side. As \Cref{subsec:eval.quant,subsec:eval.qual} show, the vector structure of the model output is not sufficiently semantically correct. A safe assumption is that this is due to the vector-based loss not properly evaluating the output of the model. The vector-based loss used in this work is an even combination of the \gls{mse} and \gls{mae} between the output and ground truth curve parameters adapted from \citet{DBLP:conf/eccv/EgiazarianVAVST20}. Other formulations might work better, such as weighting the \gls{mse} and \gls{mae} according to a linear schedule, aggregating the errors with a sum instead of the average or even differentiably rendering a heatmap of the curve parameters and using a raster image loss following the keypoint detection loss in \citet{Puhachov2021KeypointPolyvector}.
+
+An important decision in the developed method is to use an iterative model. This is influenced by the inability of \glspl{rnn} to output large sequences properly \citep{hochreiterdipl,Bengio:1994:LLD:2325857.2328340}. However, it might be possible to successfully train a model that outputs all curves at once using a Transformer \citep{DBLP:conf/nips/VaswaniSPUJGKP17} instead of an \gls{rnn} as decoder. Note that this work only explored using a Transformer model as encoder, not as decoder. \citet{DBLP:conf/eccv/EgiazarianVAVST20} use a Transformer as decoder, but still reduce the amount of curves output by the Transformer by splitting the input image into tiles and processing each tile independently.
+
+An established practice to improve model performance when single models cannot be feasibly further improved is to use an ensemble of different models \citep{Schapire1990,598994}. Hence, it might be possible to improve results by using an ensemble of state-of-the-art prior work and this model.
+
+One advantage of the developed method is its low runtime. This can be further reduced by parallelizing the iterative curve reconstruction algorithm as described in \Cref{subsec:method.limitations}.
+
+\subsection{Further Tasks}
+\label{subsec:future.tasks}
+
+As described in \Cref{sec:intro.goals,subsec:model.infer,p:advtantages.e2e}, an intrinsic characteristic of the developed method is that it is nearly end-to-end differentiable. While the focus of this work is on same-domain vectorization (i.e., turning raster clean animation frames into vector clean animation frames), in theory it is possible to extend the developed method to input images of different domains. For this, two parts of the method have to be adapted. Firstly, the marked curve reconstruction model is trained solely using clean line-art images as input and is thus not robust to input images of different domains. Due to the end-to-end differentiable nature of the model, this can be easily solved by training or finetuning the model on input images of different domains. Secondly, the curve identification algorithm needs to be adapted to input images of different domains, as laid out in \Cref{subsec:model.infer}. Alternatively, the algorithm could be extended by a learned model which converts a raster image of a different domain into a corresponding raster line-art image \citep{Kugler-2021}. This could then be used in combination to convert final animation frames in raster format into clean animation frames in vector format.
+
+Furthermore, there exist other tasks to which the developed model could be extended. These include the generation of inbetween frames based on keyframes or clean animation frame colorization (see \Cref{sec:anime.prod}). Moreover, the model output could be constrained to exhibit temporal consistency, i.e., to consist of curves that remain consistent across frames of the same scene.

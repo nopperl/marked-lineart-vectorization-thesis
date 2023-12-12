@@ -1,0 +1,158 @@
+\documentclass{memoir} % Remove option 'final' to obtain debug information.
+
+% Load packages to allow in- and output of non-ASCII characters.
+\usepackage{lmodern}        % Use an ext ension of the original Computer Modern font to minimize the use of bitmapped letters.
+\usepackage[T1]{fontenc}    % Determines font encoding of the output. Font packages have to be included before this line.
+\usepackage[utf8]{inputenc} % Determines encoding of the input. All input files have to use UTF8 encoding.
+
+\usepackage{amsmath}    % Extended typesetting of mathematical expression.
+\usepackage{amssymb}    % Provides a multitude of mathematical symbols.
+\usepackage{mathtools}  % Further extensions of mathematical typesetting.
+\usepackage{microtype}  % Small-scale typographic enhancements.
+\usepackage[inline]{enumitem} % User control over the layout of lists (itemize, enumerate, description).
+\usepackage{multirow}   % Allows table elements to span several rows.
+\usepackage{booktabs}   % Improves the typesettings of tables.
+\usepackage{subcaption} % Allows the use of subfigures and enables their referencing.
+\usepackage[ruled,linesnumbered,algochapter]{algorithm2e} % Enables the writing of pseudo code.
+\usepackage[usenames,dvipsnames,table]{xcolor} % Allows the definition and use of colors. This package has to be included before tikz.
+\usepackage{nag}       % Issues warnings when best practices in writing LaTeX documents are violated.
+\usepackage{todonotes} % Provides tooltip-like todo notes.
+\graphicspath{{graphics/}{graphics/douga/}{svg-inkscape/}}
+\usepackage[group-minimum-digits=4,group-separator={,}]{siunitx}
+\usepackage{morewrites}
+\usepackage{svg}
+\usepackage{natbib}
+\usepackage{CJKutf8}
+\usepackage{pstricks}
+\usepackage{minted}
+\usepackage{pgfplots}
+\usepackage{colortbl}
+\usepackage{wrapfig}
+\usepackage{textcomp}
+\usepackage{hyperref}  % Enables cross linking in the electronic document version.
+\usepackage[noabbrev,capitalise]{cleveref}
+\usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
+
+
+% Define convenience functions to use the author name and the thesis title in the PDF document properties.
+\newcommand{\authorname}{Author Name} % The author name without titles.
+\newcommand{\thesistitle}{Semantically Meaningful Vectorization of Line Art in Drawn Animation}
+
+% Set PDF document properties
+\hypersetup{
+    pdfpagelayout   = TwoPageRight,           % How the document is shown in PDF viewers (optional).
+    linkbordercolor = {Melon},                % The color of the borders of boxes around crosslinks (optional).
+    pdfauthor       = {\authorname},          % The author's name in the document properties (optional).
+    pdftitle        = {\thesistitle},         % The document's title in the document properties (optional).
+    pdfsubject      = {Master thesis},              % The document's subject in the document properties (optional).
+    pdfkeywords     = {vectorization, line-art, learning, animation} % The document's keywords in the document properties (optional).
+}
+
+\setpnumwidth{2.5em}        % Avoid overfull hboxes in the table of contents.
+\setsecnumdepth{subsection} % Enumerate subsections.
+
+\nonzeroparskip             % Create space between paragraphs (optional).
+\setlength{\parindent}{0pt} % Remove paragraph identation (optional).
+
+\makeindex      % Use an optional index.
+\makeglossaries % Use an optional glossary.
+%\glstocfalse   % Remove the glossaries from the table of contents.
+
+\author{\authorname}
+
+\date{3\textsuperscript{rd} December, 2023}
+\title{\thesistitle}
+
+\setcounter{tocdepth}{2}
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+\begin{document}
+
+\frontmatter % Switches to roman numbering.
+
+\maketitle
+
+\begin{abstract}
+Animation consists of sequentially showing multiple single frames with small mutual differences in order to achieve the visual effect of a moving scene. In limited animation, these frames are drawn as semantically meaningful vector images which could be referred to as clean animation frames. There are limited animation workflows in which these clean animation frames are only available in raster format, requiring laborious manual vectorization.
+
+This work explores the extent to which line-art image vectorization methods can be used to automatize this process. For this purpose, a line-art image vectorization method is designed by taking into account the structural information about clean animation frames. Together with existing state-of-the-art line-art image vectorization methods, this method is evaluated on a dataset consisting of clean animation frames. The reproducible evaluation shows that the performance of the developed method is remarkably stable across different input image resolution sizes and binarized or non-binarized versions of input images, even outperforming state-of-the-art methods at input images of the default clean animation frame resolution. Furthermore, it is up to 4.5 times faster than the second-fastest deep learning-based method. However, ultimately the evaluation shows that neither the developed method nor existing state-of-the-art methods can produce vector images that achieve both visual similarity and sufficiently semantically correct vector structures.
+\end{abstract}
+
+% Add a table of contents (toc).
+\setsecnumdepth{subsubsection}
+\tableofcontents % Starred version, i.e., \tableofcontents*, removes the self-entry.
+
+% Switch to arabic numbering and start the enumeration of chapters in the table of content.
+\mainmatter
+
+\newacronym{ro1}{RO1}{Research Objective 1}
+\newacronym{ro2}{RO2}{Research Objective 2}
+\newacronym{rq1}{RQ1}{Research Question 1}
+\newacronym{svg}{SVG}{Scalable Vector Graphics}
+\newacronym{png}{PNG}{Portable Network Graphics}
+\newacronym{rgb}{RGB}{Red-Green-Blue}
+\newacronym{mlp}{MLP}{multi-layered perceptron}
+\newacronym{relu}{ReLU}{Rectified Linear Unit}
+\newacronym{sgd}{SGD}{Stochastic Gradient Descent}
+\newacronym{gpu}{GPU}{Graphics Processing Unit}
+\newacronym{lstm}{LSTM}{Long Short-Term Memory}
+\newacronym{gru}{GRU}{Gated Recurrent Unit}
+\newacronym{nlp}{NLP}{Natural Language Processing}
+\newacronym{cnn}{CNN}{Convolutional Neural Network}
+\newacronym{rnn}{RNN}{Recurrent Neural Network}
+\newacronym{tdnn}{TDNN}{Time Delay Neural Network}
+\newacronym{vae}{VAE}{variational autoencoder}
+\newacronym{kl}{KL}{Kullback–Leibler}
+\newacronym{mse}{MSE}{mean squared error}
+\newacronym{mae}{MAE}{mean absolute error}
+\newacronym{iou}{IoU}{Intersection-over-Union}
+\newacronym{tp}{TP}{true positive}
+\newacronym{fp}{FP}{false positive}
+\newacronym{tn}{TN}{true negative}
+\newacronym{fn}{FN}{false negative}
+\newacronym{vit}{ViT}{Vision Transformer}
+\newacronym{iqr}{IQR}{inter-quartile range}
+\newacronym{onnx}{ONNX}{Open Neural Network Exchange}
+\newacronym{cuda}{CUDA}{Compute Unified Device Architecture}
+\newacronym{cudnn}{cuDNN}{CUDA Deep Neural Network}
+\newacronym{cpu}{CPU}{central processing unit}
+\newacronym{amp}{AMP}{automatic mixed precision}
+\newacronym{gpgpu}{GPGPU}{General-purpose computing on graphics processing units}
+\newacronym{stdev}{stdev}{standard deviation}
+\newacronym{mib}{MiB}{mebibyte}
+
+\input{chapters/introduction}
+\input{chapters/background.tex}
+\input{chapters/deeplearning.tex}
+\input{chapters/related-work.tex}
+\input{chapters/algorithm.tex}
+\input{chapters/conclusio.tex}
+
+\input{chapters/appendix}
+
+\backmatter
+
+% Use an optional list of figures.
+\listoffigures % Starred version, i.e., \listoffigures*, removes the toc entry.
+
+% Use an optional list of tables.
+\cleardoublepage % Start list of tables on the next empty right hand page.
+\listoftables % Starred version, i.e., \listoftables*, removes the toc entry.
+
+% Use an optional list of alogrithms.
+\listofalgorithms
+\addcontentsline{toc}{chapter}{List of Algorithms}
+
+% Add an index.
+\printindex
+
+% Add a glossary.
+\printglossaries
+
+% Add a bibliography.
+\bibliographystyle{plainnat}
+\bibliography{bibliography}
+
+
+\end{document}
